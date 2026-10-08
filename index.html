@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MAXIU KEY</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a0e27;
+            color: #fff;
+            min-height: 100vh;
+        }
+        .screen {
+            display: none;
+            min-height: 100vh;
+            padding: 20px;
+            flex-direction: column;
+            align-items: center;
+        }
+        .screen.active { display: flex; }
+
+        /* ===== SCREEN 1: UTAMA ===== */
+        #screen1 { justify-content: center; }
+        .video-box {
+            width: 100%;
+            max-width: 420px;
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: 0 12px 40px rgba(138, 43, 226, 0.35);
+            background: #000;
+            margin-bottom: 28px;
+        }
+        .video-box video {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        .btn-maxiu {
+            width: 100%;
+            max-width: 420px;
+            padding: 18px 24px;
+            background: linear-gradient(135deg, #8a2be2, #ff00ff);
+            border: none;
+            color: #fff;
+            border-radius: 12px;
+            font-size: 20px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            cursor: pointer;
+            box-shadow: 0 10px 30px rgba(138, 43, 226, 0.4);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .btn-maxiu:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 14px 36px rgba(255, 0, 255, 0.45);
+        }
+        .hint {
+            margin-top: 14px;
+            font-size: 13px;
+            color: #b0a0ff;
+            text-align: center;
+        }
+
+        /* ===== SCREEN 2: MISI + KEY ===== */
+        #screen2 { justify-content: flex-start; padding-top: 24px; padding-bottom: 40px; }
+        .page-title {
+            font-size: 22px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #8a2be2, #ff00ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 6px;
+            text-align: center;
+        }
+        .page-sub {
+            color: #b0a0ff;
+            font-size: 13px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .card {
+            width: 100%;
+            max-width: 440px;
+            background: #1a1f3a;
+            border: 2px solid #8a2be2;
+            border-radius: 14px;
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+        .card h3 {
+            font-size: 15px;
+            color: #8a2be2;
+            margin-bottom: 14px;
+        }
+
+        /* Mission steps */
+        .missions {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+        .mission-step {
+            flex: 1;
+            text-align: center;
+            padding: 12px 6px;
+            border-radius: 10px;
+            border: 2px solid #333;
+            background: rgba(0,0,0,0.25);
+            font-size: 13px;
+            font-weight: 700;
+            color: #888;
+        }
+        .mission-step.done {
+            border-color: #00e676;
+            color: #00e676;
+            background: rgba(0, 230, 118, 0.1);
+        }
+        .mission-step.active {
+            border-color: #ff00ff;
+            color: #ff00ff;
+            background: rgba(255, 0, 255, 0.08);
+        }
+
+        .btn-lv {
+            width: 100%;
+            padding: 14px;
+            background: #0d3d4a;
+            border: 2px solid #00bcd4;
+            color: #00e5ff;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-lv:hover:not(:disabled) {
+            background: rgba(0, 188, 212, 0.2);
+        }
+        .btn-lv:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        .cooldown-msg {
+            margin-top: 10px;
+            text-align: center;
+            font-size: 13px;
+            color: #ffb366;
+            display: none;
+        }
+        .cooldown-msg.show { display: block; }
+
+        /* Video kecil di page 2 */
+        .video-mini {
+            width: 100%;
+            border-radius: 10px;
+            overflow: hidden;
+            background: #000;
+            margin-bottom: 14px;
+        }
+        .video-mini video {
+            width: 100%;
+            height: auto;
+            display: block;
+            max-height: 180px;
+            object-fit: cover;
+        }
+
+        /* Key box */
+        .key-display {
+            text-align: center;
+            padding: 16px;
+            background: rgba(138, 43, 226, 0.1);
+            border-radius: 10px;
+            margin-bottom: 14px;
+        }
+        .key-label { font-size: 12px; color: #b0a0ff; margin-bottom: 6px; }
+        .key-value {
+            font-family: 'Courier New', monospace;
+            font-size: 17px;
+            font-weight: 800;
+            color: #ff00ff;
+            letter-spacing: 0.5px;
+            word-break: break-all;
+        }
+        .key-value.empty { color: #555; font-size: 14px; font-weight: 500; }
+        .key-meta {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+        .badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+        .badge-ok { background: rgba(0,230,118,0.15); color: #00e676; border: 1px solid #00e676; }
+        .badge-no { background: rgba(255,69,0,0.15); color: #ff6b6b; border: 1px solid #ff6b6b; }
+        .badge-time { background: rgba(138,43,226,0.15); color: #b0a0ff; border: 1px solid #8a2be2; }
+
+        .btn-addkey {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #8a2be2, #ff00ff);
+            border: none;
+            color: #fff;
+            border-radius: 10px;
+            font-weight: 800;
+            font-size: 15px;
+            cursor: pointer;
+        }
+        .btn-addkey:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        .success-msg {
+            margin-top: 12px;
+            text-align: center;
+            font-size: 13px;
+            color: #00e676;
+            display: none;
+            font-weight: 600;
+        }
+        .success-msg.show { display: block; }
+
+        .btn-back {
+            margin-top: 8px;
+            background: transparent;
+            border: 1px solid #555;
+            color: #aaa;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        /* Fingerprint overlay */
+        .fp-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 99999;
+            background: rgba(5, 8, 20, 0.93);
+            backdrop-filter: blur(8px);
+            align-items: center;
+            justify-content: center;
+        }
+        .fp-overlay.show { display: flex; }
+        .fp-box { text-align: center; }
+        .fp-ring {
+            position: relative;
+            width: 140px;
+            height: 140px;
+            margin: 0 auto 18px;
+        }
+        .fp-ring svg {
+            width: 140px;
+            height: 140px;
+            transform: rotate(-90deg);
+        }
+        .fp-track { fill: none; stroke: rgba(0,230,118,0.2); stroke-width: 8; }
+        .fp-progress {
+            fill: none;
+            stroke: #00e676;
+            stroke-width: 8;
+            stroke-linecap: round;
+            stroke-dasharray: 339.3;
+            stroke-dashoffset: 339.3;
+            filter: drop-shadow(0 0 8px #00e676);
+        }
+        .fp-icon {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            animation: pulse 1.2s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%,100% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+        }
+        .fp-text { font-size: 17px; font-weight: 700; margin-bottom: 4px; }
+        .fp-sub { font-size: 13px; color: #00e676; }
+
+        @media (max-width: 480px) {
+            .btn-maxiu { font-size: 18px; padding: 16px; }
+            .key-value { font-size: 15px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ========== SCREEN 1: HALAMAN UTAMA ========== -->
+    <div id="screen1" class="screen active">
+        <div class="video-box">
+            <video id="video1" autoplay loop muted playsinline webkit-playsinline>
+                <source src="https://raw.githubusercontent.com/NOVABOTV1F/BOT_KEY_WEB/main/tiktokio.com1791268330_39vUti4Rh3XA5sskjclN.mp4" type="video/mp4">
+            </video>
+        </div>
+        <button class="btn-maxiu" onclick="goToMission()">GET KEY MAXIU</button>
+        <p class="hint">Klik tombol untuk mulai misi & dapat key</p>
+    </div>
+
+    <!-- ========== SCREEN 2: MISI + KEY ========== -->
+    <div id="screen2" class="screen">
+        <div class="page-title">MAXIU KEY</div>
+        <div class="page-sub">Selesaikan misi → dapat key 24 jam</div>
+
+        <!-- KOTAK ATAS: Open Linkvertise + misi 1/2/3 -->
+        <div class="card">
+            <h3>📢 Sponsor — Selesaikan Misi</h3>
+            <div class="missions">
+                <div class="mission-step" id="m1">1</div>
+                <div class="mission-step" id="m2">2</div>
+                <div class="mission-step" id="m3">3</div>
+            </div>
+            <button class="btn-lv" id="btnLv" onclick="openLinkvertise()">Open Linkvertise</button>
+            <div class="cooldown-msg" id="cooldownMsg"></div>
+        </div>
+
+        <!-- KOTAK BAWAH: video + Add Key + key display -->
+        <div class="card">
+            <div class="video-mini">
+                <video id="video2" autoplay loop muted playsinline webkit-playsinline>
+                    <source src="https://raw.githubusercontent.com/NOVABOTV1F/BOT_KEY_WEB/main/tiktokio.com1791268269_38PsfLpJNEF2VsxL3iAm.mp4" type="video/mp4">
+                </video>
+            </div>
+
+            <div class="key-display">
+                <div class="key-label">Key Aktif</div>
+                <div class="key-value empty" id="keyValue">Belum ada key</div>
+                <div class="key-meta">
+                    <span class="badge badge-no" id="keyBadge">EXPIRED</span>
+                    <span class="badge badge-time" id="keyTime">—</span>
+                </div>
+            </div>
+
+            <button class="btn-addkey" id="btnAddKey" onclick="startFingerprint()" disabled>
+                ADD KEY
+            </button>
+            <div class="success-msg" id="successMsg"></div>
+        </div>
+
+        <button class="btn-back" onclick="goHome()">← Kembali</button>
+    </div>
+
+    <!-- Overlay sidik jari -->
+    <div id="fpOverlay" class="fp-overlay">
+        <div class="fp-box">
+            <div class="fp-ring">
+                <svg viewBox="0 0 120 120">
+                    <circle class="fp-track" cx="60" cy="60" r="54"/>
+                    <circle class="fp-progress" id="fpProgress" cx="60" cy="60" r="54"/>
+                </svg>
+                <div class="fp-icon">👆</div>
+            </div>
+            <div class="fp-text" id="fpText">Tekan sidik jari…</div>
+            <div class="fp-sub">Tahan 5 detik</div>
+        </div>
+    </div>
+
+    <script>
+        /* =========================================================
+         *  SLOT LINKVERTISE — isi URL milikmu (boleh 1–10)
+         *  Slot kosong otomatis di-skip. Jangan hapus baris array.
+         * ========================================================= */
+        var LINKVERTISE_SLOTS = [
+            '', // SLOT 1  ← tempel https://linkvertise.com/... di sini
+            '', // SLOT 2
+            '', // SLOT 3
+            '', // SLOT 4
+            '', // SLOT 5
+            '', // SLOT 6
+            '', // SLOT 7
+            '', // SLOT 8
+            '', // SLOT 9
+            ''  // SLOT 10
+        ];
+
+        var KEY_MS = 24 * 60 * 60 * 1000; // 24 jam
+        var COOLDOWN_MS = 60 * 1000;      // 1 menit
+        var mission = parseInt(localStorage.getItem('mMission') || '0', 10);
+        var lastClaim = parseInt(localStorage.getItem('mLastClaim') || '0', 10);
+        var mediaOn = false;
+        var fpBusy = false;
+
+        function pool() {
+            return LINKVERTISE_SLOTS.filter(function(u) {
+                return u && String(u).trim().length > 0;
+            });
+        }
+
+        function digits(n) {
+            var s = '';
+            for (var i = 0; i < n; i++) s += Math.floor(Math.random() * 10);
+            return s;
+        }
+
+        function genKey() {
+            return 'MAXIU_' + digits(4) + '_' + digits(4) + '_' + digits(4);
+        }
+
+        function getKeys() {
+            try { return JSON.parse(localStorage.getItem('mKeys') || '[]'); }
+            catch (e) { return []; }
+        }
+
+        function saveKeys(a) { localStorage.setItem('mKeys', JSON.stringify(a)); }
+
+        function activeKey() {
+            var now = Date.now(), best = null, keys = getKeys();
+            for (var i = 0; i < keys.length; i++) {
+                if (keys[i].expiresAt > now) {
+                    if (!best || keys[i].expiresAt > best.expiresAt) best = keys[i];
+                }
+            }
+            return best;
+        }
+
+        function remain(ms) {
+            if (ms <= 0) return '0j 0m 0d';
+            var s = Math.floor(ms / 1000);
+            var h = Math.floor(s / 3600);
+            var m = Math.floor((s % 3600) / 60);
+            var d = s % 60;
+            return h + 'j ' + m + 'm ' + d + 'd';
+        }
+
+        /* --- Navigasi --- */
+        function goToMission() {
+            startMedia();
+            document.getElementById('screen1').classList.remove('active');
+            document.getElementById('screen2').classList.add('active');
+            syncVideo();
+            refreshUI();
+        }
+
+        function goHome() {
+            document.getElementById('screen2').classList.remove('active');
+            document.getElementById('screen1').classList.add('active');
+            syncVideo();
+        }
+
+        /* --- Video suara (klik mana saja) --- */
+        function startMedia() {
+            mediaOn = true;
+            syncVideo();
+        }
+
+        function syncVideo() {
+            var s1 = document.getElementById('screen1').classList.contains('active');
+            var s2 = document.getElementById('screen2').classList.contains('active');
+            document.querySelectorAll('video').forEach(function(v) {
+                var isActive = (v.id === 'video1' && s1) || (v.id === 'video2' && s2);
+                if (isActive) {
+                    v.muted = !mediaOn;
+                    if (mediaOn) v.volume = 0.7;
+                    if (v.paused) v.play().catch(function(){});
+                } else {
+                    v.muted = true;
+                    v.pause();
+                }
+            });
+        }
+
+        document.addEventListener('click', startMedia);
+        document.addEventListener('touchstart', startMedia, { passive: true });
+
+        /* --- Linkvertise --- */
+        function openLinkvertise() {
+            var left = lastClaim + COOLDOWN_MS - Date.now();
+            if (left > 0) {
+                alert('Tunggu cooldown ' + Math.ceil(left / 1000) + ' detik.');
+                return;
+            }
+            var p = pool();
+            if (p.length === 0) {
+                alert('Belum ada link Linkvertise.\nIsi SLOT 1–10 di kode (LINKVERTISE_SLOTS).');
+                return;
+            }
+            var url = p[Math.floor(Math.random() * p.length)];
+            window.open(url, '_blank');
+            mission = Math.min(3, mission + 1);
+            localStorage.setItem('mMission', String(mission));
+            refreshUI();
+            if (mission >= 3) {
+                setTimeout(function() {
+                    alert('✅ Misi 1, 2, 3 selesai!\nTekan ADD KEY lalu sidik jari 5 detik.');
+                }, 300);
+            }
+        }
+
+        /* --- Fingerprint → Add Key --- */
+        function startFingerprint() {
+            var left = lastClaim + COOLDOWN_MS - Date.now();
+            if (left > 0) {
+                alert('Tunggu cooldown ' + Math.ceil(left / 1000) + ' detik.');
+                return;
+            }
+            if (mission < 3) {
+                alert('Selesaikan misi 1, 2, 3 dulu (Open Linkvertise 3x)!');
+                return;
+            }
+            if (fpBusy) return;
+            fpBusy = true;
+
+            var overlay = document.getElementById('fpOverlay');
+            var bar = document.getElementById('fpProgress');
+            var txt = document.getElementById('fpText');
+            var circ = 2 * Math.PI * 54;
+
+            overlay.classList.add('show');
+            txt.textContent = 'Tekan sidik jari…';
+            bar.style.strokeDasharray = String(circ);
+            bar.style.strokeDashoffset = String(circ);
+
+            var t0 = Date.now();
+            var iv = setInterval(function() {
+                var pct = Math.min(1, (Date.now() - t0) / 5000);
+                bar.style.strokeDashoffset = String(circ * (1 - pct));
+                txt.textContent = 'Memverifikasi… ' + Math.ceil(5 - (Date.now() - t0) / 1000) + 's';
+                if (pct >= 1) {
+                    clearInterval(iv);
+                    txt.textContent = '✅ Berhasil!';
+                    setTimeout(function() {
+                        overlay.classList.remove('show');
+                        fpBusy = false;
+                        addKey();
+                    }, 500);
+                }
+            }, 40);
+        }
+
+        function addKey() {
+            var keys = getKeys();
+            var act = activeKey();
+            var now = Date.now();
+            var msg = document.getElementById('successMsg');
+
+            if (act) {
+                // +24 jam
+                act.expiresAt += KEY_MS;
+                for (var i = 0; i < keys.length; i++) {
+                    if (keys[i].key === act.key) keys[i].expiresAt = act.expiresAt;
+                }
+                saveKeys(keys);
+                msg.textContent = '✅ +24 jam! Key: ' + act.key;
+            } else {
+                var k = genKey();
+                keys.push({ key: k, createdAt: now, expiresAt: now + KEY_MS });
+                saveKeys(keys);
+                msg.textContent = '✅ Key baru: ' + k + ' (24 jam)';
+            }
+            msg.classList.add('show');
+
+            // Reset misi + cooldown 1 menit
+            mission = 0;
+            lastClaim = now;
+            localStorage.setItem('mMission', '0');
+            localStorage.setItem('mLastClaim', String(now));
+            refreshUI();
+        }
+
+        /* --- UI refresh tiap detik --- */
+        function refreshUI() {
+            var now = Date.now();
+            var coolLeft = lastClaim + COOLDOWN_MS - now;
+            var onCool = coolLeft > 0;
+
+            // Mission steps
+            for (var i = 1; i <= 3; i++) {
+                var el = document.getElementById('m' + i);
+                el.className = 'mission-step';
+                if (i <= mission) el.classList.add('done');
+                else if (i === mission + 1 && !onCool) el.classList.add('active');
+            }
+
+            // Buttons
+            var btnLv = document.getElementById('btnLv');
+            var btnAdd = document.getElementById('btnAddKey');
+            var coolMsg = document.getElementById('cooldownMsg');
+
+            if (btnLv) {
+                btnLv.disabled = onCool || mission >= 3;
+                if (onCool) btnLv.textContent = 'Open Linkvertise (cooldown)';
+                else if (mission >= 3) btnLv.textContent = 'Misi selesai ✓';
+                else btnLv.textContent = 'Open Linkvertise';
+            }
+            if (btnAdd) {
+                btnAdd.disabled = onCool || mission < 3 || fpBusy;
+                var act = activeKey();
+                btnAdd.textContent = act ? 'ADD KEY (+24 jam)' : 'ADD KEY';
+            }
+            if (coolMsg) {
+                if (onCool) {
+                    coolMsg.classList.add('show');
+                    coolMsg.textContent = '⏳ Loading cooldown: ' + Math.ceil(coolLeft / 1000) + 's — belum bisa Open Linkvertise';
+                } else {
+                    coolMsg.classList.remove('show');
+                }
+            }
+
+            // Key box
+            var act = activeKey();
+            var kv = document.getElementById('keyValue');
+            var kb = document.getElementById('keyBadge');
+            var kt = document.getElementById('keyTime');
+            if (act) {
+                kv.textContent = act.key;
+                kv.classList.remove('empty');
+                kb.textContent = 'ASLI';
+                kb.className = 'badge badge-ok';
+                kt.textContent = 'Sisa ' + remain(act.expiresAt - now);
+            } else {
+                kv.textContent = 'Belum ada key / EXPIRED';
+                kv.classList.add('empty');
+                kb.textContent = 'EXPIRED';
+                kb.className = 'badge badge-no';
+                kt.textContent = 'Tidak bisa dipakai';
+            }
+        }
+
+        setInterval(refreshUI, 1000);
+
+        window.addEventListener('load', function() {
+            // Video muted dulu
+            document.querySelectorAll('video').forEach(function(v) {
+                v.muted = true;
+                v.play().catch(function(){});
+            });
+            refreshUI();
+        });
+
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden) syncVideo();
+        });
+    </script>
+</body>
+</html>
